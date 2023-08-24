@@ -2,13 +2,17 @@ import {Header} from './Header'
 import {Menu} from './Menu'
 import SpeakerData from "./SpeakerData";
 import SpeakerDetail from "./SpeakerDetail";
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState, useContext, useReducer} from 'react';
 import { ConfigContext } from "./App";
+import speakersReducer from "./speakersReducer"
 
 const Speakers = ({}) => {
     const[speakingSaturday, setSpeakingSaturday] = useState(true);
     const[speakingSunday, setSpeakingSunday] = useState(true);
-    const[speakerList, setSpeakerList] = useState([]);
+
+
+    const[speakerList,dispatch] = useReducer(speakersReducer, []);
+
     const[isLoading, setIsLoading] = useState(true);
 
     const context = useContext(ConfigContext);
@@ -20,13 +24,18 @@ const Speakers = ({}) => {
                 resolve();
             }, 1000);
         }).then(() => {
-            setSpeakerList(SpeakerData);
             setIsLoading(false);
-            console.log('cleanup1');
+            const speakerListServerFilter = SpeakerData.filter(({ sat,sun }) => {
+                return (speakingSaturday && sat) || (speakingSunday && sun);
+            });
+            //setSpeakerList(speakerListServerFilter)
+            dispatch({
+                type: "setSpeakerList",
+                data: speakerListServerFilter
+            });
         });
-
         return () => {
-            console.log('cleanup2');
+            console.log('cleanup');
         };
     }, []);
 
@@ -56,14 +65,20 @@ const Speakers = ({}) => {
     const heartFavoriteHandler = (e, favoriteValue) => {
         e.preventDefault();
         const sessionId = parseInt(e.target.attributes['data-sessionid'].value);
-        setSpeakerList(
-            speakerList.map((item) => {
-                if (item.id === sessionId) {
-                    return {...item, favourite: favoriteValue};
-                }
-                return item;
-            }),
-        );
+
+        dispatch({
+            type: favoriteValue === true ? "favourite" : "unfavourite",
+            sessionId: sessionId
+        });
+
+        // setSpeakerList(
+        //     speakerList.map((item) => {
+        //         if (item.id === sessionId) {
+        //             return {...item, favourite: favoriteValue};
+        //         }
+        //         return item;
+        //     })
+        // );
     };
 
     if (isLoading) return <div>Loading...</div>;
