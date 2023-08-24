@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext, useReducer, useCallback} from 'react';
+import React, {useEffect, useState, useContext, useReducer, useCallback, useMemo} from 'react';
 import speakersReducer from "./speakersReducer";
 import SpeakerDetail from "./SpeakerDetail";
 import SpeakerData from "./SpeakerData";
@@ -46,7 +46,7 @@ const Speakers = ({}) => {
         setSpeakingSunday(!speakingSunday);
     };
 
-    const speakerListFiltered = isLoading ? [] :
+    const newSpeakerList = useMemo(() =>
         speakerList.filter(
             ({sat,sun}) =>
                 (speakingSaturday && sat) || (speakingSunday && sun),
@@ -58,8 +58,9 @@ const Speakers = ({}) => {
                 return 1;
             }
             return 0;
-            }
-        );
+        }), [speakingSunday, speakingSaturday, speakerList])
+
+    const speakerListFiltered = isLoading ? [] : newSpeakerList;
 
     const heartFavoriteHandler = useCallback((e, favoriteValue) => {
         e.preventDefault();
