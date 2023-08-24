@@ -1,10 +1,10 @@
+import React, {useEffect, useState, useContext, useReducer, useCallback} from 'react';
+import speakersReducer from "./speakersReducer";
+import SpeakerDetail from "./SpeakerDetail";
+import SpeakerData from "./SpeakerData";
+import { ConfigContext } from "./App";
 import {Header} from './Header'
 import {Menu} from './Menu'
-import SpeakerData from "./SpeakerData";
-import SpeakerDetail from "./SpeakerDetail";
-import React, {useEffect, useState, useContext, useReducer} from 'react';
-import { ConfigContext } from "./App";
-import speakersReducer from "./speakersReducer"
 
 const Speakers = ({}) => {
     const[speakingSaturday, setSpeakingSaturday] = useState(true);
@@ -28,7 +28,6 @@ const Speakers = ({}) => {
             const speakerListServerFilter = SpeakerData.filter(({ sat,sun }) => {
                 return (speakingSaturday && sat) || (speakingSunday && sun);
             });
-            //setSpeakerList(speakerListServerFilter)
             dispatch({
                 type: "setSpeakerList",
                 data: speakerListServerFilter
@@ -62,7 +61,7 @@ const Speakers = ({}) => {
             }
         );
 
-    const heartFavoriteHandler = (e, favoriteValue) => {
+    const heartFavoriteHandler = useCallback((e, favoriteValue) => {
         e.preventDefault();
         const sessionId = parseInt(e.target.attributes['data-sessionid'].value);
 
@@ -70,16 +69,7 @@ const Speakers = ({}) => {
             type: favoriteValue === true ? "favourite" : "unfavourite",
             sessionId: sessionId
         });
-
-        // setSpeakerList(
-        //     speakerList.map((item) => {
-        //         if (item.id === sessionId) {
-        //             return {...item, favourite: favoriteValue};
-        //         }
-        //         return item;
-        //     })
-        // );
-    };
+    }, []);
 
     if (isLoading) return <div>Loading...</div>;
 
